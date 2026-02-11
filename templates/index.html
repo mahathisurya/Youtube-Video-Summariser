@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Summarizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            text-align: center;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input[type="text"],
+        input[type="url"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+        }
+        
+        .range-value {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .result-section {
+            margin-bottom: 20px;
+        }
+        
+        .result-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .result-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+        
+        .error {
+            display: none;
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .translation-section {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 YouTube Video Summarizer</h1>
+        <p class="subtitle">AI-powered transcription, translation, and summarization</p>
+        
+        <form id="videoForm">
+            <div class="form-group">
+                <label for="videoUrl">YouTube Video URL</label>
+                <input type="url" id="videoUrl" name="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required>
+            </div>
+            
+            <div class="form-group">
+                <label for="sourceLanguage">Source Language</label>
+                <select id="sourceLanguage" name="sourceLanguage">
+                    <option value="en">English</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                    <option value="ar">Arabic</option>
+                    <option value="hi">Hindi</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="summaryRatio">Summary Compression Ratio: <span id="ratioValue">30%</span></label>
+                <input type="range" id="summaryRatio" name="summaryRatio" min="10" max="50" value="30" step="5">
+            </div>
+            
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="includeTranslation" name="includeTranslation">
+                <label for="includeTranslation" style="margin-bottom: 0;">Enable Translation</label>
+            </div>
+            
+            <div class="form-group translation-section" id="translationSection">
+                <label for="targetLanguage">Target Language</label>
+                <select id="targetLanguage" name="targetLanguage">
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="it">Italian</option>
+                    <option value="pt">Portuguese</option>
+                    <option value="en">English</option>
+                    <option value="ja">Japanese</option>
+                    <option value="ko">Korean</option>
+                    <option value="zh">Chinese</option>
+                </select>
+            </div>
+            
+            <button type="submit" id="submitBtn">Process Video</button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 15px; color: #667eea;">Processing video... This may take a few minutes.</p>
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div class="results" id="results">
+            <div class="result-section">
+                <h3>📊 Video Information</h3>
+                <div class="stats" id="stats"></div>
+            </div>
+            
+            <div class="result-section">
+                <h3>✂️ Summary</h3>
+                <div class="result-content" id="summary"></div>
+            </div>
+            
+            <div class="result-section" id="transcriptSection">
+                <h3>📝 Full Transcript</h3>
+                <div class="result-content" id="transcript"></div>
+            </div>
+            
+            <div class="result-section" id="translationResultSection" style="display: none;">
+                <h3>🌐 Translation</h3>
+                <div class="result-content" id="translationResult"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const form = document.getElementById('videoForm');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const error = document.getElementById('error');
+        const submitBtn = document.getElementById('submitBtn');
+        const includeTranslation = document.getElementById('includeTranslation');
+        const translationSection = document.getElementById('translationSection');
+        const summaryRatio = document.getElementById('summaryRatio');
+        const ratioValue = document.getElementById('ratioValue');
+        
+        // Update ratio display
+        summaryRatio.addEventListener('input', (e) => {
+            ratioValue.textContent = e.target.value + '%';
+        });
+        
+        // Toggle translation section
+        includeTranslation.addEventListener('change', (e) => {
+            translationSection.style.display = e.target.checked ? 'block' : 'none';
+        });
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide previous results and errors
+            results.style.display = 'none';
+            error.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+            
+            const formData = {
+                video_url: document.getElementById('videoUrl').value,
+                source_language: document.getElementById('sourceLanguage').value,
+                summary_ratio: parseInt(summaryRatio.value) / 100,
+                include_translation: includeTranslation.checked
+            };
+            
+            if (includeTranslation.checked) {
+                formData.target_language = document.getElementById('targetLanguage').value;
+            }
+            
+            try {
+                const response = await fetch('/api/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'An error occurred while processing the video.');
+                }
+            } catch (err) {
+                showError('Network error: ' + err.message);
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function displayResults(data) {
+            // Display stats
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${Math.floor(data.metadata.duration / 60)}m</div>
+                    <div class="stat-label">Duration</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.transcription.word_count.toLocaleString()}</div>
+                    <div class="stat-label">Words</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.summary.compression_percentage}%</div>
+                    <div class="stat-label">Reduction</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${data.metadata.views.toLocaleString()}</div>
+                    <div class="stat-label">Views</div>
+                </div>
+            `;
+            document.getElementById('stats').innerHTML = statsHtml;
+            
+            // Display summary
+            document.getElementById('summary').innerHTML = `
+                <h4 style="margin-bottom: 10px;">${data.metadata.title}</h4>
+                <p style="color: #666; margin-bottom: 15px;">by ${data.metadata.author}</p>
+                <p>${data.summary.text}</p>
+            `;
+            
+            // Display transcript
+            document.getElementById('transcript').textContent = data.transcription.text;
+            
+            // Display translation if available
+            if (data.translation) {
+                document.getElementById('translationResultSection').style.display = 'block';
+                document.getElementById('translationResult').textContent = data.translation.text;
+            } else {
+                document.getElementById('translationResultSection').style.display = 'none';
+            }
+            
+            results.style.display = 'block';
+        }
+        
+        function showError(message) {
+            error.textContent = '❌ Error: ' + message;
+            error.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
