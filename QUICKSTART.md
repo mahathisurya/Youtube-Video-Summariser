@@ -5,7 +5,9 @@ Get up and running with YouTube Video Summarizer in 5 minutes!
 ## Prerequisites
 
 - Python 3.8+
-- AssemblyAI API Key ([Get free key](https://www.assemblyai.com/))
+- ffmpeg (usually pre-installed on macOS)
+
+**That's it! No API keys needed!** 🎉
 
 ## Setup (3 Steps)
 
@@ -21,13 +23,19 @@ This will:
 - Create `.env` file
 - Set up directories
 
-### 2️⃣ Add API Key
+### 2️⃣ Optional Configuration
 
-Edit `.env` and add your AssemblyAI API key:
+You can customize settings in `.env` (optional):
 
 ```bash
-ASSEMBLYAI_API_KEY=your_actual_api_key_here
+# Whisper model size (tiny, base, small, medium, large)
+WHISPER_MODEL_SIZE=base
+
+# Max video duration in seconds
+MAX_VIDEO_DURATION=7200
 ```
+
+**No API keys needed!** Whisper runs locally on your machine.
 
 ### 3️⃣ Start Server
 

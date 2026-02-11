@@ -48,7 +48,7 @@
 │    VIDEO     │  │ TRANSCRIBE   │  │   TRANSLATION    │
 │  DOWNLOADER  │  │              │  │                   │
 │              │  │              │  │                   │
-│ • pytube     │  │ • AssemblyAI │  │ • Googletrans    │
+│ • yt-dlp     │  │ • Whisper    │  │ • Deep Trans     │
 │ • moviepy    │  │ • Multi-lang │  │ • 100+ langs     │
 │ • Extract    │  │ • Auto-detect│  │ • Chunking       │
 └──────────────┘  └──────────────┘  └───────────────────┘
@@ -108,10 +108,10 @@
    ▼
 4. TRANSCRIPTION (transcription.py)
    │
-   ├─► Upload audio to AssemblyAI
-   ├─► Wait for transcription
+   ├─► Load Whisper model (if not loaded)
+   ├─► Transcribe audio locally
    ├─► Receive text transcript
-   ├─► Get word count, confidence
+   ├─► Get word count, language
    │
    ▼
 5. TRANSLATION (translation.py) [OPTIONAL]
@@ -163,8 +163,8 @@
                                │
                                ▼
                       ┌────────────────┐
-                      │ AssemblyAI     │
-                      │ Transcription  │
+                      │ Whisper AI     │
+                      │ (Local, FREE!) │
                       └────────┬───────┘
                                │
                                ▼
@@ -202,7 +202,7 @@
 |-----------|-----------|---------|---------|
 | app.py | All services, utils | Client | API endpoints, routing |
 | video_downloader | pytube, moviepy | app.py | Download & extract audio |
-| transcription | AssemblyAI | app.py | Speech-to-text |
+| transcription | Whisper (local) | app.py | Speech-to-text |
 | translation | googletrans | app.py | Multi-language translation |
 | summarizer | transformers, torch | app.py | Text summarization |
 | validators | - | app.py | Input validation |
@@ -236,7 +236,7 @@
 ┌─────────────────────────────────────────┐
 │         EXTERNAL SERVICES               │
 │  • YouTube API                          │
-│  • AssemblyAI API                       │
+│  • OpenAI Whisper (LOCAL)               │
 │  • Google Translate API                 │
 │  • HuggingFace Models                   │
 └─────────────────────────────────────────┘
